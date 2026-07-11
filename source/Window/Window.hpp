@@ -18,6 +18,7 @@ class Window : public QWidget
     QWidget *main_Widget;
     QVBoxLayout *main_Layout;
     QLineEdit *main_IpAddressLineEdit;
+    QLineEdit *main_PortLineEdit;
     QPushButton *main_ConnectBttn;
     // Элементы главного меню
 
@@ -26,5 +27,4 @@ class Window : public QWidget
 public:
     Window(QWidget *parent = nullptr);
     const QPushButton &get_main_ConnectBttn();
-    
 };

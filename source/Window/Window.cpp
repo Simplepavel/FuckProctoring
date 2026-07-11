@@ -26,11 +26,16 @@ void Window::draw_menu()
     main_IpAddressLineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     main_IpAddressLineEdit->setPlaceholderText("ip adress");
 
+    main_PortLineEdit = new QLineEdit;
+    main_PortLineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    main_PortLineEdit->setPlaceholderText("port");
+
     main_ConnectBttn = new QPushButton;
     main_ConnectBttn->setText("connect");
     main_ConnectBttn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
     main_Layout->addWidget(main_IpAddressLineEdit);
+    main_Layout->addWidget(main_PortLineEdit);
     main_Layout->addWidget(main_ConnectBttn);
 
     main_Layout->setAlignment(Qt::AlignCenter);
