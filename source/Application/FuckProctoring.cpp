@@ -1,41 +1,36 @@
 #include "FuckProctoring.hpp"
 
-FuckProctoringApp::FuckProctoringApp(int argc, char *argv[], unsigned short port) : app(argc, argv), ep(boost::asio::ip::address_v4::any(), port), protocol(boost::asio::ip::tcp::v4()), server_socket(ioc), client_socket(ioc)
+FuckProctoringApp::FuckProctoringApp(int argc, char *argv[], unsigned short port) : app(argc, argv), work(ioc.get_executor()), server(ioc, port), client(ioc)
 {
-    qobject_connect();
-
-    server_socket.open(protocol);
-    server_socket.bind(ep);
-    server_socket.listen();
-    auto lambda = [this]()
-    { std::cout << "wait for connection\n"; server_socket.accept(client_socket, ec); };
-    server_thread = std::move(std::thread(lambda));
-} // запуск нового потока, ожидающего подключения
+    connect();
+    ioc_thread = std::move(std::thread([this]()
+                                       { ioc.run(); }));
+}
 
 FuckProctoringApp::~FuckProctoringApp()
 {
-    if (client_socket.is_open()) // в этом состоянии нет активного слущающего потока, он есть поток обмена информацией
-    {
-        client_socket.shutdown(boost::asio::socket_base::shutdown_send);
-        client_socket.close();
-    }
-    else
-    {
-        server_socket.close();
-        server_thread.join();
-    }
+    work.reset();
+    client.cancel();
+    server.cancel();
+    ioc_thread.join();
 }
 
-void FuckProctoringApp::qobject_connect()
+void FuckProctoringApp::connect()
 {
-    QObject::connect(&window.get_main_ConnectBttn(), &QPushButton::clicked, this, &FuckProctoringApp::qobject_on_connect);
+    QObject::connect(&window.get_main_ConnectBttn(), &QPushButton::clicked, this, &FuckProctoringApp::get_server_endpoint);
+    QObject::connect(&server, &FuckProctoringServer::on_accept, &window, &Window::make_dialog);
+    QObject::connect(&window, &Window::user_response, &server, &FuckProctoringServer::on_user_response);
 }
 
-void FuckProctoringApp::qobject_on_connect()
+// public slots
+void FuckProctoringApp::get_server_endpoint()
 {
-    std::cout << "Button clicked";
+    const QString &raw_ip = window.get_main_IpAddressLineEdit().text();
+    unsigned int port = window.get_main_PortLineEdit().text().toUInt();
+    client.connect(raw_ip, port);
 }
 
+// public
 int FuckProctoringApp::start()
 {
     return app.exec();

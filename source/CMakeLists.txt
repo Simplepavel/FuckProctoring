@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(FuckProctoring)
 
 
@@ -16,11 +16,11 @@ set(qt_lib "C:/msys64/ucrt64/lib/libQt6Core.dll.a;C:/msys64/ucrt64/lib/libQt6Wid
 set(boost_include_path D:/Libs++/BOOST)
 include_directories(${boost_include_path}) # -I D:/Libs++/BOOST
 set(boost_lib_path "D:/Libs++/BOOST/stage/lib") # -L 
-set(boost_lib ws2_32 ${boost_lib_path}/libboost_timer-vc143-mt-gd-x32-1_91.lib ${boost_lib_path}/libboost_timer-vc143-mt-gd-x64-1_91.lib ${boost_lib_path}/libboost_timer-vc143-mt-x32-1_91.lib ${boost_lib_path}/libboost_timer-vc143-mt-x64-1_91.lib)
+set(boost_lib wsock32 ws2_32 ${boost_lib_path}/libboost_timer-vc143-mt-gd-x32-1_91.lib ${boost_lib_path}/libboost_timer-vc143-mt-gd-x64-1_91.lib ${boost_lib_path}/libboost_timer-vc143-mt-x32-1_91.lib ${boost_lib_path}/libboost_timer-vc143-mt-x64-1_91.lib)
 
 
 
-set(source Window/Window.cpp Application/FuckProctoring.cpp)
+set(source Interface/Window.cpp Client/Client.cpp Server/Server.cpp Application/FuckProctoring.cpp Protocol/Protocol.cpp)
 add_executable(main main.cpp ${source})
 
 

@@ -1,36 +1,44 @@
+#ifndef FUCK
+#define FUCK
+
 #include <QApplication>
-#include "../Window/Window.hpp"
 #include <boost/asio.hpp>
 #include <thread>
 #include <string>
 #include <iostream>
+#include <QString>
+#include <chrono>
 
-#define PORT 6767
-#define AUTOMOC_MACRO_NAMES
+#include "../Interface/Window.hpp"
+#include "../Server/Server.hpp"
+#include "../Client/Client.hpp"
+
 
 class FuckProctoringApp : public QObject
 {
     Q_OBJECT
 
+    boost::asio::io_context ioc;
+    std::thread ioc_thread;
+    boost::asio::executor_work_guard<decltype(ioc.get_executor())> work;
+
     QApplication app;
     Window window;
+    FuckProctoringServer server;
+    FuckProctoringClient client;
 
-    // для запуска сервера
-    boost::system::error_code ec;
-    boost::asio::io_context ioc;
-    boost::asio::ip::tcp::endpoint ep;
-    boost::asio::ip::tcp protocol;
-    boost::asio::ip::tcp::acceptor server_socket;
-    boost::asio::ip::tcp::socket client_socket;
-    std::thread server_thread;
-    // для запуска сервера
+    void connect();
 
-    void qobject_connect();
-private slots:
-    void qobject_on_connect();
+signals:
+    void signal1(const QString &raw_ip, unsigned short port);
+
+public slots:
+    void get_server_endpoint();
 
 public:
     FuckProctoringApp(int argc, char *argv[], unsigned short port);
     ~FuckProctoringApp();
     int start();
 };
+
+#endif

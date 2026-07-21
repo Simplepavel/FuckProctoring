@@ -47,3 +47,43 @@ const QPushButton &Window::get_main_ConnectBttn()
 {
     return *main_ConnectBttn;
 }
+
+const QLineEdit &Window::get_main_IpAddressLineEdit()
+{
+    return *main_IpAddressLineEdit;
+}
+
+const QLineEdit &Window::get_main_PortLineEdit()
+{
+    return *main_PortLineEdit;
+}
+
+void Window::make_dialog(const QString &txt)
+{
+    QDialog *dialog_window = new QDialog(main_Widget);
+    dialog_window->setWindowTitle("Incomming connection");
+    dialog_window->setModal(true);
+
+    QLabel *lbl = new QLabel(txt, dialog_window);
+    QPushButton *ok = new QPushButton("OK", dialog_window);
+    QPushButton *cancel = new QPushButton("Cancel", dialog_window);
+
+    QHBoxLayout *inner = new QHBoxLayout;
+    inner->addWidget(ok);
+    inner->addWidget(cancel);
+
+    QVBoxLayout *outer = new QVBoxLayout;
+
+    outer->addWidget(lbl);
+    outer->addLayout(inner);
+
+    dialog_window->setLayout(outer);
+
+    QObject::connect(ok, &QPushButton::clicked, dialog_window, &QDialog::accept);
+    QObject::connect(cancel, &QPushButton::clicked, dialog_window, &QDialog::reject);
+
+    dialog_window->show();
+
+    int ans = dialog_window->exec();
+    emit user_response(ans == QDialog::Accepted);
+}
