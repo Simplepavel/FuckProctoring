@@ -13,7 +13,6 @@
 #include "../Server/Server.hpp"
 #include "../Client/Client.hpp"
 
-
 class FuckProctoringApp : public QObject
 {
     Q_OBJECT
@@ -33,7 +32,14 @@ signals:
     void signal1(const QString &raw_ip, unsigned short port);
 
 public slots:
-    void get_server_endpoint();
+    void connect_to_server();
+    void send_message();
+    void close_message();
+    void on_accept();
+    void on_connect();
+    void show_main();
+    void show_chat();
+    void on_shutdown();
 
 public:
     FuckProctoringApp(int argc, char *argv[], unsigned short port);

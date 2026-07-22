@@ -9,6 +9,7 @@
 #include <QMetaObject>
 #include <QDialog>
 #include <QLabel>
+#include <QPlainTextEdit>
 #include <iostream>
 #include <future>
 
@@ -30,18 +31,33 @@ class Window : public QWidget
     QPushButton *main_ConnectBttn;
     // Элементы главного меню
 
-    void draw_menu();
-signals:
-    void user_response(bool);
+    // Мини чат
+    QWidget *chat_Widget;
+    QVBoxLayout *chat_Layout;
+    QPlainTextEdit *chat_PlainText;
+    QLineEdit *chat_LineEdit;
+    QPushButton *chat_SendPushButton;
+    QPushButton *chat_ClosePushButton;
+    //
 
-public slots:
-    void make_dialog(const QString &);
+    void draw_main();
+    void draw_chat();
 
 public:
     Window(QWidget *parent = nullptr);
-    const QPushButton &get_main_ConnectBttn();
-    const QLineEdit &get_main_IpAddressLineEdit();
-    const QLineEdit &get_main_PortLineEdit();
+    QPushButton &get_main_ConnectBttn();
+    QLineEdit &get_main_IpAddressLineEdit();
+    QLineEdit &get_main_PortLineEdit();
+
+    QLineEdit &get_chat_LineEdit();
+    QPushButton &get_chat_SendPushButton();
+    QPlainTextEdit &get_chat_PlainText();
+    QPushButton &get_chat_ClosePushButton();
+
+    bool make_dialog(const QString &);
+
+    void show_main();
+    void show_chat();
 };
 
 #endif

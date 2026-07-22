@@ -1,6 +1,6 @@
 #include "Protocol.hpp"
 
-Mark1::Mark1() : type(DataType::NONE), length(0), data(nullptr)
+Mark1::Mark1() : type(DataType::NONE), length(0), data(nullptr), own(false)
 {
 }
 
@@ -8,6 +8,7 @@ Mark1::Mark1(const Mark1 &argv)
 {
     type = argv.type;
     length = argv.length;
+    own = true;
     data = new char[length];
     memcpy(data, argv.data, length);
 }
@@ -18,6 +19,7 @@ Mark1 &Mark1::operator=(const Mark1 &argv)
     {
         type = argv.type;
         length = argv.length;
+        own = true;
         data = new char[length];
         memcpy(data, argv.data, length);
     }
@@ -29,8 +31,10 @@ Mark1::Mark1(Mark1 &&argv)
     type = argv.type;
     length = argv.length;
     data = argv.data;
+    own = argv.own;
     argv.length = 0;
     argv.data = nullptr;
+    argv.own = false;
 }
 
 Mark1 &Mark1::operator=(Mark1 &&argv)
@@ -40,15 +44,20 @@ Mark1 &Mark1::operator=(Mark1 &&argv)
         type = argv.type;
         length = argv.length;
         data = argv.data;
+        own = argv.own;
         argv.length = 0;
         argv.data = nullptr;
+        argv.own = false;
     }
     return *this;
 }
 
 Mark1::~Mark1()
 {
-    delete[] data;
+    if (own)
+    {
+        delete[] data;
+    }
 }
 
 uint32_t Mark1::capacity() const { return length + 5; } // data.length + data.type + data.data
@@ -84,6 +93,7 @@ Mark1 Mark1::deserialize(char *buffer)
     result.length = ntohl(net_length);
 
     result.data = new char[result.length];
+    result.own = true;
     memcpy(result.data, buffer + 5, result.length);
     return result;
 }

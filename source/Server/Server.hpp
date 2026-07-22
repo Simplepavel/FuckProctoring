@@ -18,6 +18,8 @@ class FuckProctoringServer : public QObject
     // для взаимодействия с клиентов
     boost::asio::ip::tcp::socket connection_with_client_socket;
 
+    bool is_active; // соединение установлено или нет
+
     struct ReadSession
     {
         std::unique_ptr<char[]> buffer;
@@ -60,15 +62,21 @@ class FuckProctoringServer : public QObject
     void write_callback(const boost::system::error_code &ec, size_t bytes, std::shared_ptr<WriteSession> session);
 
 signals:
-    void on_accept(const QString &); // non_blocking invoke
-public slots:
-    void on_user_response(bool ans);
+    void on_accept(); // non_blocking invoke
+    void show_main(); // запрос к графическому интерфейсу включить главное окно
+    void show_chat(); // запрос к графическому интерфейсу включить чат
+    void shutdown();
+    // public slots:
 
 public:
     FuckProctoringServer(boost::asio::io_context &_ioc, unsigned short port = 12345);
     void cancel();
+    void connection_with_client_cancel();
     void read();
+    void accept();
     void write(std::unique_ptr<char[]> data, size_t dl);
+    bool active();
+    void on_user_response(bool ans);
 };
 
 #endif

@@ -9,7 +9,7 @@ enum DataType : uint8_t // что передали какой тип данны�
 {
     NONE,
     ACCEPT,
-
+    TEXT,
 };
 
 struct Mark1
@@ -17,6 +17,7 @@ struct Mark1
     DataType type;   // тип данных
     char *data;      // данные
     uint32_t length; // длина полезных данных
+    bool own;
 
     char *serialize() const;
     uint32_t capacity() const;

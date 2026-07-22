@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-FuckProctoringServer::FuckProctoringServer(boost::asio::io_context &_ioc, unsigned short port) : ioc(_ioc), ep(boost::asio::ip::address_v4::any(), port), protocol(boost::asio::ip::tcp::v4()), server_socket(ioc), connection_with_client_socket(ioc)
+FuckProctoringServer::FuckProctoringServer(boost::asio::io_context &_ioc, unsigned short port) : ioc(_ioc), ep(boost::asio::ip::address_v4::any(), port), protocol(boost::asio::ip::tcp::v4()), server_socket(ioc), connection_with_client_socket(ioc), is_active(false)
 {
     server_socket.open(protocol);
     server_socket.bind(ep);
@@ -22,7 +22,7 @@ void FuckProctoringServer::accept_callback(const boost::system::error_code &ec)
         }
         return;
     }
-    emit on_accept(QString::fromStdString("Connection from..."));
+    emit on_accept();
 }
 
 void FuckProctoringServer::read_capacity_callback(size_t bytes, const boost::system::error_code &ec, std::shared_ptr<ReadSession> session_ptr)
@@ -30,8 +30,11 @@ void FuckProctoringServer::read_capacity_callback(size_t bytes, const boost::sys
     if (ec.value() != 0)
     {
         if (ec.value() == boost::asio::error::eof)
+        {
             connection_with_client_socket.close();
-        std::cout << ec.message() << '\n';
+            is_active = false;
+            emit shutdown();
+        }
         return;
     }
     session_ptr->have_read += bytes;
@@ -71,11 +74,16 @@ void FuckProctoringServer::read_data_callback(size_t bytes, const boost::system:
     if (session_ptr->have_read == session_ptr->data_length)
     {
         Mark1 result = Mark1::deserialize(session_ptr->buffer.get());
-        // if (result.type == DataType::ACCEPT)
-        // {
-        //     std::cout << "Client is ready to communicate\n";
-        // }
-        // return;
+        if (result.type == DataType::ACCEPT)
+        {
+            emit show_chat();
+        }
+        else if (result.type == DataType::TEXT)
+        {
+            std::cout << "I have sent the message\n";
+        }
+        read();
+        return;
     }
 
     auto lambda = [this, session_ptr](const boost::system::error_code &ec, size_t bytes)
@@ -105,31 +113,15 @@ void FuckProctoringServer::write_callback(const boost::system::error_code &ec, s
     connection_with_client_socket.async_write_some(session_ptr->const_buffer_sequence, lambda);
 }
 
-// public slots
-void FuckProctoringServer::on_user_response(bool ans)
-{
-    if (!ans)
-    {
-        connection_with_client_socket.shutdown(boost::asio::socket_base::shutdown_send);
-        connection_with_client_socket.close();
-        server_socket.async_accept(connection_with_client_socket, [this](const boost::system::error_code &ec)
-                                   { this->accept_callback(ec); });
-    }
-    else
-    {
-        Mark1 data;
-        data.type = DataType::ACCEPT;
-        size_t data_length = data.fullsize();
-        std::unique_ptr<char[]> to_send;
-        to_send.reset(data.serialize());
-        write(std::move(to_send), data_length); // говорим клиенту, что готовы отправлять данные
-        read();
-    }
-}
-
 void FuckProctoringServer::cancel()
 {
     server_socket.cancel();
+}
+
+void FuckProctoringServer::connection_with_client_cancel()
+{
+    if (connection_with_client_socket.is_open())
+        connection_with_client_socket.cancel();
 }
 
 void FuckProctoringServer::read()
@@ -142,12 +134,49 @@ void FuckProctoringServer::read()
     connection_with_client_socket.async_read_some(capacity_session->mutable_buffer_sequence, lambda);
 }
 
+void FuckProctoringServer::accept()
+{
+    server_socket.async_accept(connection_with_client_socket, [this](const boost::system::error_code &ec)
+                               { this->accept_callback(ec); }); // сразу начинаем слушать
+}
+
 void FuckProctoringServer::write(std::unique_ptr<char[]> data, size_t dl)
 {
+    if (data == nullptr)
+    {
+        connection_with_client_socket.shutdown(boost::asio::socket_base::shutdown_send);
+        connection_with_client_socket.close();
+        is_active = false;
+        return;
+    }
     std::shared_ptr<WriteSession> session_ptr = std::make_shared<WriteSession>(std::move(data), dl);
     auto lambda = [this, session_ptr](const boost::system::error_code &ec, size_t bytes)
     {
         this->write_callback(ec, bytes, session_ptr);
     };
     connection_with_client_socket.async_write_some(session_ptr->const_buffer_sequence, lambda);
+}
+
+bool FuckProctoringServer::active() { return is_active; }
+
+void FuckProctoringServer::on_user_response(bool ans)
+{
+    if (!ans)
+    {
+        connection_with_client_socket.shutdown(boost::asio::socket_base::shutdown_send);
+        connection_with_client_socket.close();
+        server_socket.async_accept(connection_with_client_socket, [this](const boost::system::error_code &ec)
+                                   { this->accept_callback(ec); });
+    }
+    else
+    {
+        is_active = true;
+        Mark1 data;
+        data.type = DataType::ACCEPT;
+        size_t data_length = data.fullsize();
+        std::unique_ptr<char[]> to_send;
+        to_send.reset(data.serialize());
+        write(std::move(to_send), data_length); // говорим клиенту, что готовы отправлять данные
+        read();
+    }
 }

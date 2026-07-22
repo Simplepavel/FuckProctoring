@@ -18,6 +18,10 @@ class FuckProctoringClient : public QObject
     boost::asio::ip::tcp protocol;
     boost::asio::ip::tcp::socket client_socket;
 
+    std::mutex mtx;
+
+    bool is_active;
+
     struct ReadSession
     {
         std::unique_ptr<char[]> buffer;
@@ -59,12 +63,19 @@ class FuckProctoringClient : public QObject
     void read_data_callback(size_t bytes, const boost::system::error_code &ec, std::shared_ptr<ReadSession> session);
     void write_callback(const boost::system::error_code &ec, size_t bytes, std::shared_ptr<WriteSession> session_ptr);
 
+signals:
+    void on_connect();
+    void show_main(); // запрос к графическому интерфейсу включить главное окно
+    void show_chat(); // запрос к графическому интерфейсу включить чат
+    void shutdown();
+
 public:
     FuckProctoringClient(boost::asio::io_context &_ioc);
     void connect(const QString &raw_ip, unsigned short port);
     void cancel();
     void read();
     void write(std::unique_ptr<char[]> data, size_t dl);
+    bool active();
 };
 
 #endif

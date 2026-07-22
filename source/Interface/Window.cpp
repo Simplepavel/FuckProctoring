@@ -5,10 +5,14 @@ Window::Window(QWidget *parent) : QWidget(parent)
     listOfWidget = new QStackedLayout(this);
 
     // Главное меню
-    draw_menu();
+    draw_main();
+    // Для теста
+    draw_chat();
 
     // Добавление всех дочерних виджетов в стек виджетов
     listOfWidget->addWidget(main_Widget);
+    // Для теста
+    listOfWidget->addWidget(chat_Widget);
     listOfWidget->setAlignment(Qt::AlignCenter);
 
     // Отрисовка
@@ -16,7 +20,7 @@ Window::Window(QWidget *parent) : QWidget(parent)
     show();
 }
 
-void Window::draw_menu()
+void Window::draw_main()
 {
     // Главное меню
     main_Widget = new QWidget(this);
@@ -43,22 +47,55 @@ void Window::draw_menu()
     // Главное меню
 }
 
-const QPushButton &Window::get_main_ConnectBttn()
+void Window::draw_chat()
+{
+    chat_Widget = new QWidget(this);
+    chat_Layout = new QVBoxLayout;
+
+    chat_PlainText = new QPlainTextEdit;
+    chat_PlainText->setReadOnly(true);
+
+    chat_LineEdit = new QLineEdit;
+    chat_LineEdit->setPlaceholderText("Type a message...");
+
+    chat_SendPushButton = new QPushButton;
+    chat_SendPushButton->setText("Send");
+
+    chat_ClosePushButton = new QPushButton;
+    chat_ClosePushButton->setText("Close");
+
+    chat_Layout->addWidget(chat_PlainText);
+    chat_Layout->addWidget(chat_LineEdit);
+    chat_Layout->addWidget(chat_SendPushButton);
+    chat_Layout->addWidget(chat_ClosePushButton);
+
+    chat_Layout->setAlignment(Qt::AlignCenter);
+    chat_Widget->setLayout(chat_Layout);
+}
+
+QPushButton &Window::get_main_ConnectBttn()
 {
     return *main_ConnectBttn;
 }
-
-const QLineEdit &Window::get_main_IpAddressLineEdit()
+QLineEdit &Window::get_main_IpAddressLineEdit()
 {
     return *main_IpAddressLineEdit;
 }
-
-const QLineEdit &Window::get_main_PortLineEdit()
+QLineEdit &Window::get_main_PortLineEdit()
 {
     return *main_PortLineEdit;
 }
-
-void Window::make_dialog(const QString &txt)
+QLineEdit &Window::get_chat_LineEdit()
+{
+    return *chat_LineEdit;
+}
+QPushButton &Window::get_chat_SendPushButton()
+{
+    return *chat_SendPushButton;
+}
+QPlainTextEdit &Window::get_chat_PlainText() { return *chat_PlainText; }
+QPushButton &Window::get_chat_ClosePushButton() { return *chat_ClosePushButton; }
+bool Window::make_dialog(const QString &txt)
 {
     QDialog *dialog_window = new QDialog(main_Widget);
     dialog_window->setWindowTitle("Incomming connection");
@@ -85,5 +122,17 @@ void Window::make_dialog(const QString &txt)
     dialog_window->show();
 
     int ans = dialog_window->exec();
-    emit user_response(ans == QDialog::Accepted);
+    return (ans == QDialog::Accepted);
+    // emit user_response(ans == QDialog::Accepted);
+}
+
+// public slots
+void Window::show_chat()
+{
+    listOfWidget->setCurrentWidget(chat_Widget);
+}
+
+void Window::show_main()
+{
+    listOfWidget->setCurrentWidget(main_Widget);
 }
