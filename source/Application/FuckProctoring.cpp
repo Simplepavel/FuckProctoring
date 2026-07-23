@@ -12,6 +12,7 @@ FuckProctoringApp::~FuckProctoringApp()
     work.reset();
     client.cancel();
     server.cancel();
+    server.connection_with_client_cancel();
     ioc_thread.join();
 }
 
@@ -33,6 +34,10 @@ void FuckProctoringApp::connect()
 
     QObject::connect(&server, &FuckProctoringServer::shutdown, this, &FuckProctoringApp::on_shutdown);
     QObject::connect(&client, &FuckProctoringClient::shutdown, this, &FuckProctoringApp::on_shutdown);
+    QObject::connect(&window, &Window::close, this, &FuckProctoringApp::on_shutdown);
+
+    QObject::connect(&server, &FuckProctoringServer::get_message, this, &FuckProctoringApp::get_message);
+    QObject::connect(&client, &FuckProctoringClient::get_message, this, &FuckProctoringApp::get_message);
 }
 
 // public slots
@@ -61,6 +66,7 @@ void FuckProctoringApp::send_message()
     {
         client.write(std::move(prepare_message), result.fullsize());
     }
+    window.get_chat_PlainText().appendPlainText("You: " + window.get_chat_LineEdit().text());
     window.get_chat_LineEdit().setText("");
 }
 
@@ -81,6 +87,8 @@ void FuckProctoringApp::close_message() // мы иницировали разр�
 
 void FuckProctoringApp::on_accept()
 {
+    window.get_chat_PlainText().clear();
+    window.get_chat_LineEdit().clear();
     server.on_user_response(window.make_dialog("Connection from..."));
 }
 
@@ -89,11 +97,15 @@ void FuckProctoringApp::on_connect()
     /*
     Отмена слушающего интерфейса
     */
+    window.get_chat_PlainText().clear();
+    window.get_chat_LineEdit().clear();
     server.cancel();
 }
 
 void FuckProctoringApp::show_main()
 {
+    window.get_main_IpAddressLineEdit().clear();
+    window.get_main_PortLineEdit().clear();
     window.show_main();
 }
 
@@ -107,6 +119,12 @@ void FuckProctoringApp::on_shutdown() // другая сторона иници�
     window.show_main();
     server.accept();
 }
+
+void FuckProctoringApp::get_message(const QString &message)
+{
+    window.get_chat_PlainText().appendPlainText("Anonym: " + message);
+}
+
 // public
 int FuckProctoringApp::start()
 {

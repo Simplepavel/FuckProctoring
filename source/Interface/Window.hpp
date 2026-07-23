@@ -10,6 +10,7 @@
 #include <QDialog>
 #include <QLabel>
 #include <QPlainTextEdit>
+#include <QCloseEvent>
 #include <iostream>
 #include <future>
 
@@ -43,6 +44,11 @@ class Window : public QWidget
     void draw_main();
     void draw_chat();
 
+    void closeEvent(QCloseEvent *event) override;
+
+signals:
+    void close();
+
 public:
     Window(QWidget *parent = nullptr);
     QPushButton &get_main_ConnectBttn();
@@ -55,7 +61,6 @@ public:
     QPushButton &get_chat_ClosePushButton();
 
     bool make_dialog(const QString &);
-
     void show_main();
     void show_chat();
 };

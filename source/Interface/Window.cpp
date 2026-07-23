@@ -73,6 +73,15 @@ void Window::draw_chat()
     chat_Widget->setLayout(chat_Layout);
 }
 
+void Window::closeEvent(QCloseEvent *event)
+{
+    /*
+    по необходимости пишем дополнительный функционал
+    */
+    emit close();
+    event->accept();
+}
+
 QPushButton &Window::get_main_ConnectBttn()
 {
     return *main_ConnectBttn;

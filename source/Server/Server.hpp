@@ -66,6 +66,7 @@ signals:
     void show_main(); // запрос к графическому интерфейсу включить главное окно
     void show_chat(); // запрос к графическому интерфейсу включить чат
     void shutdown();
+    void get_message(const QString &); // получили сообщение от собеседника
     // public slots:
 
 public:

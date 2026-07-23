@@ -80,7 +80,8 @@ void FuckProctoringServer::read_data_callback(size_t bytes, const boost::system:
         }
         else if (result.type == DataType::TEXT)
         {
-            std::cout << "I have sent the message\n";
+            QString message(result.data);
+            emit get_message(message);
         }
         read();
         return;
