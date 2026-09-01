@@ -55,8 +55,18 @@ void Window::draw_chat()
     chat_PlainText = new QPlainTextEdit;
     chat_PlainText->setReadOnly(true);
 
+    // Создаю горизонтальное выравние для поля ввода и для кнопки открытия файла
+    chat_InnerHLayout = new QHBoxLayout;
+
     chat_LineEdit = new QLineEdit;
     chat_LineEdit->setPlaceholderText("Type a message...");
+
+    chat_OpenFileButton = new QPushButton;
+    chat_OpenFileButton->setText("...");
+
+    chat_InnerHLayout->addWidget(chat_LineEdit);
+    chat_InnerHLayout->addWidget(chat_OpenFileButton);
+    //
 
     chat_SendPushButton = new QPushButton;
     chat_SendPushButton->setText("Send");
@@ -65,7 +75,7 @@ void Window::draw_chat()
     chat_ClosePushButton->setText("Close");
 
     chat_Layout->addWidget(chat_PlainText);
-    chat_Layout->addWidget(chat_LineEdit);
+    chat_Layout->addLayout(chat_InnerHLayout);
     chat_Layout->addWidget(chat_SendPushButton);
     chat_Layout->addWidget(chat_ClosePushButton);
 
@@ -82,6 +92,12 @@ void Window::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
+// private slots
+void Window::open_file()
+{
+    qDebug() << "Open File cmd";
+}
+
 QPushButton &Window::get_main_ConnectBttn()
 {
     return *main_ConnectBttn;
@@ -94,6 +110,7 @@ QLineEdit &Window::get_main_PortLineEdit()
 {
     return *main_PortLineEdit;
 }
+
 QLineEdit &Window::get_chat_LineEdit()
 {
     return *chat_LineEdit;
@@ -104,6 +121,8 @@ QPushButton &Window::get_chat_SendPushButton()
 }
 QPlainTextEdit &Window::get_chat_PlainText() { return *chat_PlainText; }
 QPushButton &Window::get_chat_ClosePushButton() { return *chat_ClosePushButton; }
+QPushButton &Window::get_chat_OpenFileButton() { return *chat_OpenFileButton; }
+
 bool Window::make_dialog(const QString &txt)
 {
     QDialog *dialog_window = new QDialog(main_Widget);
@@ -135,7 +154,6 @@ bool Window::make_dialog(const QString &txt)
     // emit user_response(ans == QDialog::Accepted);
 }
 
-// public slots
 void Window::show_chat()
 {
     listOfWidget->setCurrentWidget(chat_Widget);
@@ -144,4 +162,9 @@ void Window::show_chat()
 void Window::show_main()
 {
     listOfWidget->setCurrentWidget(main_Widget);
+}
+
+void Window::connect()
+{
+    QObject::connect(chat_OpenFileButton, &QPushButton::clicked, this, &Window::open_file);
 }

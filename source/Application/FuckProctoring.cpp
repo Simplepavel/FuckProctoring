@@ -3,6 +3,7 @@
 FuckProctoringApp::FuckProctoringApp(int argc, char *argv[], unsigned short port) : app(argc, argv), work(ioc.get_executor()), server(ioc, port), client(ioc)
 {
     connect();
+    window.connect();
     ioc_thread = std::move(std::thread([this]()
                                        { ioc.run(); }));
 }
