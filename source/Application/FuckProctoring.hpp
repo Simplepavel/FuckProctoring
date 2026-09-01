@@ -8,7 +8,6 @@
 #include <iostream>
 #include <QString>
 #include <chrono>
-#include <QCloseEvent>
 #include "../Interface/Window.hpp"
 #include "../Server/Server.hpp"
 #include "../Client/Client.hpp"
@@ -44,7 +43,6 @@ public slots:
 
 public:
     FuckProctoringApp(int argc, char *argv[], unsigned short port);
-
     ~FuckProctoringApp();
     int start();
 };

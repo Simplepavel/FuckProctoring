@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QPlainTextEdit>
 #include <QCloseEvent>
+#include <QFileDialog>
 #include <iostream>
 #include <future>
 
