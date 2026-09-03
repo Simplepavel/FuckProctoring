@@ -77,11 +77,19 @@ void FuckProctoringServer::read_data_callback(size_t bytes, const boost::system:
         if (result.type == DataType::ACCEPT)
         {
             emit show_chat();
+            result.own = true;
         }
         else if (result.type == DataType::TEXT)
         {
             QString message(result.data);
             emit get_message(message);
+            result.own = true;
+        }
+        else if (result.type == DataType::VIDEO)
+        {
+            QByteArray video(result.data, result.length);
+            emit get_video(video);
+            result.own = true;
         }
         read();
         return;

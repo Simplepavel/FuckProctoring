@@ -4,7 +4,9 @@
 #include "../Protocol/Protocol.hpp"
 #include <boost/asio.hpp>
 #include <QObject>
+#include <QByteArray>
 #include <QString>
+#include <fstream>
 class FuckProctoringServer : public QObject
 {
 
@@ -67,6 +69,7 @@ signals:
     void show_chat(); // запрос к графическому интерфейсу включить чат
     void shutdown();
     void get_message(const QString &); // получили сообщение от собеседника
+    void get_video(const QByteArray &);
     // public slots:
 
 public:

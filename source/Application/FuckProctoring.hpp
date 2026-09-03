@@ -6,11 +6,13 @@
 #include <thread>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <QString>
 #include <chrono>
 #include "../Interface/Window.hpp"
 #include "../Server/Server.hpp"
 #include "../Client/Client.hpp"
+#include <QBuffer>
 
 class FuckProctoringApp : public QObject
 {
@@ -33,6 +35,7 @@ signals:
 public slots:
     void connect_to_server();
     void send_message();
+    void send_video();
     void close_message();
     void on_accept();
     void on_connect();
@@ -40,6 +43,7 @@ public slots:
     void show_chat();
     void on_shutdown();
     void get_message(const QString &);
+    void get_video(const QByteArray &);
 
 public:
     FuckProctoringApp(int argc, char *argv[], unsigned short port);

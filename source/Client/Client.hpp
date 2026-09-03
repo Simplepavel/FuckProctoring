@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <fstream>
 #include <condition_variable>
 #include "../Protocol/Protocol.hpp"
 class FuckProctoringClient : public QObject
@@ -69,6 +70,7 @@ signals:
     void show_chat(); // запрос к графическому интерфейсу включить чат
     void shutdown();
     void get_message(const QString &); // получили сообщение от собеседника
+    void get_video(const QByteArray&); // получили видео от собеседника
 
 public:
     FuckProctoringClient(boost::asio::io_context &_ioc);

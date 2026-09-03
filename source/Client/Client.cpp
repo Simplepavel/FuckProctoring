@@ -79,13 +79,22 @@ void FuckProctoringClient::read_data_callback(size_t bytes, const boost::system:
             to_send.reset(data.serialize());
             write(std::move(to_send), data_length); // говорим серверу, что готовы принимать данные
             emit show_chat();
+            result.own = true;
         }
 
         else if (result.type == DataType::TEXT)
         {
             QString message(result.data);
             emit get_message(message);
-            // std::cout << "I have sent the message\n";
+            result.own = true;
+        }
+
+        else if (result.type == DataType::VIDEO)
+        {
+
+            QByteArray video(result.data, result.length);
+            emit get_video(video);
+            result.own = true;
         }
 
         read();

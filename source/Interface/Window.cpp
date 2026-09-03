@@ -1,11 +1,11 @@
 #include "Window.hpp"
 
-Window::Window(QWidget *parent) : QWidget(parent)
+Window::Window(unsigned short port, QWidget *parent) : QWidget(parent)
 {
     listOfWidget = new QStackedLayout(this);
 
     // Главное меню
-    draw_main();
+    draw_main(port);
     // Для теста
     draw_chat();
 
@@ -20,11 +20,16 @@ Window::Window(QWidget *parent) : QWidget(parent)
     show();
 }
 
-void Window::draw_main()
+void Window::draw_main(unsigned short port)
 {
     // Главное меню
     main_Widget = new QWidget(this);
     main_Layout = new QVBoxLayout;
+
+    main_PortLabel = new QLabel;
+    main_PortLabel->setText(QString("Port: ") + QString::number(port));
+    main_PortLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    main_PortLabel->setAlignment(Qt::AlignCenter);
 
     main_IpAddressLineEdit = new QLineEdit;
     main_IpAddressLineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -38,6 +43,7 @@ void Window::draw_main()
     main_ConnectBttn->setText("connect");
     main_ConnectBttn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
+    main_Layout->addWidget(main_PortLabel);
     main_Layout->addWidget(main_IpAddressLineEdit);
     main_Layout->addWidget(main_PortLineEdit);
     main_Layout->addWidget(main_ConnectBttn);
@@ -50,13 +56,15 @@ void Window::draw_main()
 void Window::draw_chat()
 {
     chat_Widget = new QWidget(this);
-    chat_Layout = new QVBoxLayout;
+    chat_Layout = new QGridLayout;
 
     chat_PlainText = new QPlainTextEdit;
     chat_PlainText->setReadOnly(true);
 
-    // Создаю горизонтальное выравние для поля ввода и для кнопки открытия файла
-    chat_InnerHLayout = new QHBoxLayout;
+    chat_VideoWidget = new QVideoWidget;
+    chat_MediaPlayer = new QMediaPlayer;
+
+    chat_MediaPlayer->setVideoOutput(chat_VideoWidget);
 
     chat_LineEdit = new QLineEdit;
     chat_LineEdit->setPlaceholderText("Type a message...");
@@ -64,20 +72,21 @@ void Window::draw_chat()
     chat_OpenFileButton = new QPushButton;
     chat_OpenFileButton->setText("...");
 
-    chat_InnerHLayout->addWidget(chat_LineEdit);
-    chat_InnerHLayout->addWidget(chat_OpenFileButton);
-    //
-
     chat_SendPushButton = new QPushButton;
     chat_SendPushButton->setText("Send");
 
     chat_ClosePushButton = new QPushButton;
     chat_ClosePushButton->setText("Close");
 
-    chat_Layout->addWidget(chat_PlainText);
-    chat_Layout->addLayout(chat_InnerHLayout);
-    chat_Layout->addWidget(chat_SendPushButton);
-    chat_Layout->addWidget(chat_ClosePushButton);
+    chat_Layout->setColumnStretch(0, 3);
+    chat_Layout->setColumnStretch(1, 7);
+    chat_Layout->addWidget(chat_PlainText, 0, 0);
+    // chat_Layout->addWidget(chat_VideoWidget, 0, 1);
+
+    chat_Layout->addWidget(chat_LineEdit, 1, 1);
+    chat_Layout->addWidget(chat_OpenFileButton, 1, 0);
+    chat_Layout->addWidget(chat_SendPushButton, 2, 0, 1, 0);
+    chat_Layout->addWidget(chat_ClosePushButton, 3, 0, 1, 0);
 
     chat_Layout->setAlignment(Qt::AlignCenter);
     chat_Widget->setLayout(chat_Layout);
@@ -90,12 +99,6 @@ void Window::closeEvent(QCloseEvent *event)
     */
     emit close();
     event->accept();
-}
-
-// private slots
-void Window::open_file()
-{
-    qDebug() << "Open File cmd";
 }
 
 QPushButton &Window::get_main_ConnectBttn()
@@ -120,6 +123,7 @@ QPushButton &Window::get_chat_SendPushButton()
     return *chat_SendPushButton;
 }
 QPlainTextEdit &Window::get_chat_PlainText() { return *chat_PlainText; }
+QMediaPlayer &Window::get_chat_MediaPlayer() { return *chat_MediaPlayer; }
 QPushButton &Window::get_chat_ClosePushButton() { return *chat_ClosePushButton; }
 QPushButton &Window::get_chat_OpenFileButton() { return *chat_OpenFileButton; }
 
@@ -150,8 +154,24 @@ bool Window::make_dialog(const QString &txt)
     dialog_window->show();
 
     int ans = dialog_window->exec();
+    delete dialog_window;
     return (ans == QDialog::Accepted);
     // emit user_response(ans == QDialog::Accepted);
+}
+
+QList<QString> Window::make_file_dialog()
+{
+    QFileDialog *openfile_window = new QFileDialog(this);
+    openfile_window->setNameFilter("(*.mp4 *.mov *.mpeg-1 *.mpeg-2 *.mpeg4 *.avi)");
+    openfile_window->setFileMode(QFileDialog::ExistingFile);
+    int ans = openfile_window->exec();
+    QList<QString> result;
+    if (ans == QFileDialog::Accepted)
+    {
+        result = openfile_window->selectedFiles();
+    }
+    delete openfile_window;
+    return result;
 }
 
 void Window::show_chat()
@@ -162,9 +182,4 @@ void Window::show_chat()
 void Window::show_main()
 {
     listOfWidget->setCurrentWidget(main_Widget);
-}
-
-void Window::connect()
-{
-    QObject::connect(chat_OpenFileButton, &QPushButton::clicked, this, &Window::open_file);
 }

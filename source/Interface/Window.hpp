@@ -12,6 +12,11 @@
 #include <QPlainTextEdit>
 #include <QCloseEvent>
 #include <QFileDialog>
+#include <QString>
+#include <QGridLayout>
+#include <QMediaPlayer>
+#include <QVideoWidget>
+#include <QList>
 #include <iostream>
 #include <future>
 
@@ -28,6 +33,7 @@ class Window : public QWidget
     // Элементы главного меню.
     QWidget *main_Widget;
     QVBoxLayout *main_Layout;
+    QLabel *main_PortLabel;
     QLineEdit *main_IpAddressLineEdit;
     QLineEdit *main_PortLineEdit;
     QPushButton *main_ConnectBttn;
@@ -35,10 +41,12 @@ class Window : public QWidget
 
     // Мини чат
     QWidget *chat_Widget;
-    QVBoxLayout *chat_Layout;
-    QPlainTextEdit *chat_PlainText;
+    QGridLayout *chat_Layout;
 
-    QHBoxLayout *chat_InnerHLayout;
+    QPlainTextEdit *chat_PlainText;
+    QVideoWidget *chat_VideoWidget;
+    QMediaPlayer *chat_MediaPlayer;
+
     QLineEdit *chat_LineEdit;
     QPushButton *chat_OpenFileButton;
 
@@ -46,7 +54,7 @@ class Window : public QWidget
     QPushButton *chat_ClosePushButton;
     //
 
-    void draw_main();
+    void draw_main(unsigned short port);
     void draw_chat();
 
     void closeEvent(QCloseEvent *event) override;
@@ -55,14 +63,11 @@ class Window : public QWidget
     те сигналы и слоты, которые не касаются сервера или клиента
     */
 
-private slots:
-    void open_file();
-
 signals:
     void close();
 
 public:
-    Window(QWidget *parent = nullptr);
+    Window(unsigned short port, QWidget *parent = nullptr);
     // main
     QPushButton &get_main_ConnectBttn();
     QLineEdit &get_main_IpAddressLineEdit();
@@ -73,14 +78,15 @@ public:
     QLineEdit &get_chat_LineEdit();
     QPushButton &get_chat_SendPushButton();
     QPlainTextEdit &get_chat_PlainText();
+    QMediaPlayer &get_chat_MediaPlayer();
     QPushButton &get_chat_ClosePushButton();
     QPushButton &get_chat_OpenFileButton();
     // chat
 
     bool make_dialog(const QString &);
+    QList<QString> make_file_dialog();
     void show_main();
     void show_chat();
-    void connect();
 };
 
 #endif

@@ -1,9 +1,8 @@
 #include "FuckProctoring.hpp"
 
-FuckProctoringApp::FuckProctoringApp(int argc, char *argv[], unsigned short port) : app(argc, argv), work(ioc.get_executor()), server(ioc, port), client(ioc)
+FuckProctoringApp::FuckProctoringApp(int argc, char *argv[], unsigned short port) : work(ioc.get_executor()), app(argc, argv), window(port), server(ioc, port), client(ioc)
 {
     connect();
-    window.connect();
     ioc_thread = std::move(std::thread([this]()
                                        { ioc.run(); }));
 }
@@ -20,6 +19,7 @@ FuckProctoringApp::~FuckProctoringApp()
 void FuckProctoringApp::connect()
 {
     QObject::connect(&window.get_main_ConnectBttn(), &QPushButton::clicked, this, &FuckProctoringApp::connect_to_server);
+    QObject::connect(&window.get_chat_OpenFileButton(), &QPushButton::clicked, this, &FuckProctoringApp::send_video);
 
     QObject::connect(&server, &FuckProctoringServer::on_accept, this, &FuckProctoringApp::on_accept);
     QObject::connect(&client, &FuckProctoringClient::on_connect, this, &FuckProctoringApp::on_connect);
@@ -39,6 +39,9 @@ void FuckProctoringApp::connect()
 
     QObject::connect(&server, &FuckProctoringServer::get_message, this, &FuckProctoringApp::get_message);
     QObject::connect(&client, &FuckProctoringClient::get_message, this, &FuckProctoringApp::get_message);
+
+    QObject::connect(&server, &FuckProctoringServer::get_video, this, &FuckProctoringApp::get_video);
+    QObject::connect(&client, &FuckProctoringClient::get_video, this, &FuckProctoringApp::get_video);
 }
 
 // public slots
@@ -69,6 +72,37 @@ void FuckProctoringApp::send_message()
     }
     window.get_chat_PlainText().appendPlainText("You: " + window.get_chat_LineEdit().text());
     window.get_chat_LineEdit().setText("");
+}
+
+void FuckProctoringApp::send_video()
+{
+    QList<QString> files = window.make_file_dialog();
+    if (files.empty())
+        return;
+    QString filename = files[0];
+    std::ifstream video(filename.toStdString(), std::ios_base::binary);
+    video.seekg(0, std::ios_base::end);
+    std::size_t length = (std::size_t)video.tellg();
+    video.seekg(0, std::ios_base::beg);
+
+    Mark1 result;
+    result.data = new char[length];
+    result.type = DataType::VIDEO;
+    result.length = length;
+    result.own = true;
+
+    video.read(result.data, result.length);
+    std::unique_ptr<char[]> prepare_message;
+    prepare_message.reset(result.serialize());
+
+    if (server.active())
+    {
+        server.write(std::move(prepare_message), result.fullsize());
+    }
+    else if (client.active())
+    {
+        client.write(std::move(prepare_message), result.fullsize());
+    }
 }
 
 void FuckProctoringApp::close_message() // мы иницировали разрыв
@@ -124,6 +158,12 @@ void FuckProctoringApp::on_shutdown() // другая сторона иници�
 void FuckProctoringApp::get_message(const QString &message)
 {
     window.get_chat_PlainText().appendPlainText("Anonym: " + message);
+}
+
+// TODO
+void FuckProctoringApp::get_video(const QByteArray &video)
+{
+    std::cout << "I should show a video\n";
 }
 
 // public

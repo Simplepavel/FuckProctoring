@@ -10,6 +10,7 @@ enum DataType : uint8_t // что передали какой тип данны�
     NONE,
     ACCEPT,
     TEXT,
+    VIDEO
 };
 
 struct Mark1
