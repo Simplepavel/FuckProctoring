@@ -176,7 +176,6 @@ void FuckProctoringApp::get_video(const QByteArray &_video)
     }
     qbuffer.setBuffer(&video);
     qbuffer.open(QBuffer::ReadOnly);
-
     chat_MediaPlayer.setSourceDevice(&qbuffer, QUrl("memory://video.mp4"));
     chat_MediaPlayer.play();
 }
