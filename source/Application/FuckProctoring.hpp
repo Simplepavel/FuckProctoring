@@ -23,6 +23,9 @@ class FuckProctoringApp : public QObject
     boost::asio::executor_work_guard<decltype(ioc.get_executor())> work;
 
     QApplication app;
+    QByteArray video;
+    QBuffer qbuffer;
+
     Window window;
     FuckProctoringServer server;
     FuckProctoringClient client;

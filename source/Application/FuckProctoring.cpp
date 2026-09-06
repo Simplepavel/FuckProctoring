@@ -2,6 +2,10 @@
 
 FuckProctoringApp::FuckProctoringApp(int argc, char *argv[], unsigned short port) : work(ioc.get_executor()), app(argc, argv), window(port), server(ioc, port), client(ioc)
 {
+
+    // QMediaPlayer &chat_MediaPlayer = window.get_chat_MediaPlayer();
+    // chat_MediaPlayer.setSourceDevice(&qbuffer);
+
     connect();
     ioc_thread = std::move(std::thread([this]()
                                        { ioc.run(); }));
@@ -161,9 +165,21 @@ void FuckProctoringApp::get_message(const QString &message)
 }
 
 // TODO
-void FuckProctoringApp::get_video(const QByteArray &video)
+void FuckProctoringApp::get_video(const QByteArray &_video)
 {
-    std::cout << "I should show a video\n";
+    video = _video;
+    QMediaPlayer &chat_MediaPlayer = window.get_chat_MediaPlayer();
+    chat_MediaPlayer.stop();
+    chat_MediaPlayer.setSourceDevice(nullptr, QUrl());
+    if (qbuffer.isOpen())
+    {
+        qbuffer.close();
+    }
+    qbuffer.setBuffer(&video);
+    qbuffer.open(QBuffer::ReadOnly);
+
+    chat_MediaPlayer.setSourceDevice(&qbuffer, QUrl("memory://video.mp4"));
+    chat_MediaPlayer.play();
 }
 
 // public

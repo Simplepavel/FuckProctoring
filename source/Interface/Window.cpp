@@ -81,7 +81,7 @@ void Window::draw_chat()
     chat_Layout->setColumnStretch(0, 3);
     chat_Layout->setColumnStretch(1, 7);
     chat_Layout->addWidget(chat_PlainText, 0, 0);
-    // chat_Layout->addWidget(chat_VideoWidget, 0, 1);
+    chat_Layout->addWidget(chat_VideoWidget, 0, 1);
 
     chat_Layout->addWidget(chat_LineEdit, 1, 1);
     chat_Layout->addWidget(chat_OpenFileButton, 1, 0);
