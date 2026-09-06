@@ -164,7 +164,6 @@ void FuckProctoringApp::get_message(const QString &message)
     window.get_chat_PlainText().appendPlainText("Anonym: " + message);
 }
 
-// TODO
 void FuckProctoringApp::get_video(const QByteArray &_video)
 {
     video = _video;
